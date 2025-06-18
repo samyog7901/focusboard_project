@@ -9,12 +9,15 @@
 </head>
 <body class="bg-gray-100">
 <div class="container mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Task List</h1>
+  <div class="flex justify-end items-center mb-6 space-x-2">
     <button id="newTaskBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
       <i class="fas fa-plus mr-2"></i> New Task
     </button>
+    <button id="logOutBtn" onclick="/login" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+      <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+    </button>
   </div>
+
 
   <div class="bg-white shadow-md rounded-lg overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
@@ -40,13 +43,15 @@
           </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-          <button class="text-indigo-600 hover:text-indigo-900 mr-3">
+          <!-- ✅ Fixed: Pass actual task.id -->
+          <button th:onclick="'editTask(' + ${task.id} + ')'" class="text-indigo-600 hover:text-indigo-900 mr-3">
             <i class="fas fa-edit"></i>
           </button>
-          <button class="text-red-600 hover:text-red-900">
+          <button th:onclick="'deleteTask(' + ${task.id} + ')'" class="text-red-600 hover:text-red-900">
             <i class="fas fa-trash-alt"></i>
           </button>
         </td>
+
       </tr>
       </tbody>
     </table>
@@ -158,6 +163,76 @@
       }
     });
   });
+
+    document.getElementById("logOutBtn").addEventListener("click", function () {
+    // Clear authentication data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Redirect to login page
+    window.location.href = "/login"; // Change this if your login page path is different
+  });
+
+    // Delete Task (requires admin role)
+    function deleteTask(id) {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+
+    fetch(`/api/tasks/${id}`, {
+    method: 'DELETE',
+    headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+  }
+  })
+    .then(response => {
+    if (response.ok) {
+    alert("Task deleted.");
+    location.reload(); // refresh task list
+  } else {
+    return response.text().then(text => { throw new Error(text); });
+  }
+  })
+    .catch(err => {
+    alert("Error deleting task: " + err.message);
+  });
+  }
+
+    // Edit Task (show prompt and call PUT)
+    function editTask(id) {
+    const title = prompt("Enter new title:");
+    const description = prompt("Enter new description:");
+    const status = prompt("Enter new status (TODO, IN_PROGRESS, DONE):");
+
+    const updatedTask = {
+    title,
+    description,
+    status
+    // Add other fields like project if required
+  };
+
+    fetch(`/api/tasks/${id}`, {
+    method: 'PUT',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+  },
+    body: JSON.stringify(updatedTask)
+  })
+    .then(response => {
+    if (response.ok) {
+    alert("Task updated.");
+    location.reload();
+  } else {
+    return response.text().then(text => { throw new Error(text); });
+  }
+  })
+    .catch(err => {
+    alert("Error updating task: " + err.message);
+  });
+  }
+
+
+
+
 </script>
 </body>
 </html>

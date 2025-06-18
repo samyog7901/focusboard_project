@@ -25,6 +25,21 @@ public class WebController {
         return "auth";
     }
 
+    @GetMapping("/forgot-password")
+    public String forgotPassword() {
+        return "forgot-password";  // This should match your HTML file name
+    }
+
+    @GetMapping("/verify-otp")
+    public String verifyOtp() {
+        return "verify-otp";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPassword() {
+        return "reset-password";
+    }
+
     @GetMapping("/dashboard")
     public String dashboardPage(Model model) {
         // For now, get all tasks. In a real app, you'd filter by user
