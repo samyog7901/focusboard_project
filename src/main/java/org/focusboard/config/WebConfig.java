@@ -14,7 +14,11 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173")
+                        .allowedOrigins(
+                            "http://localhost:5173",
+                            "https://work-1-pisjratpnsdrnsvp.prod-runtime.all-hands.dev",
+                            "https://work-2-pisjratpnsdrnsvp.prod-runtime.all-hands.dev"
+                        )
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);

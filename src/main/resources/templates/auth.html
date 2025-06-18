@@ -21,6 +21,55 @@
             document.getElementById('indicator').classList.toggle('left-0', isLoginMode);
             document.getElementById('indicator').classList.toggle('left-1/2', !isLoginMode);
         }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const name = formData.get('name');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            if (!isLoginMode && password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+            const payload = isLoginMode 
+                ? { email, password }
+                : { username: name, email, password };
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (isLoginMode) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data));
+                        window.location.href = '/dashboard';
+                    } else {
+                        alert('Registration successful! Please login.');
+                        toggleMode(true);
+                    }
+                } else {
+                    alert(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        }
     </script>
 </head>
 <body class="bg-[#498bf5] min-h-screen flex items-center justify-center px-4">
@@ -37,7 +86,7 @@
     </div>
 
     <!-- Form -->
-    <form class="space-y-4" method="POST" action="/auth">
+    <form class="space-y-4" onsubmit="handleSubmit(event)">
         <!-- Signup-only field -->
         <input id="nameField" name="name" type="text" placeholder="Name" class="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-cyan-500 placeholder-gray-400 hidden" />
 

@@ -1,4 +1,4 @@
-package org.focusboard;
+package org.focusboard.service.payment;
 
 public class StripePaymentService implements PaymentService {
     @Override
