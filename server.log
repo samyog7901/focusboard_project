@@ -34,3 +34,18 @@
 2025-06-18T03:49:12.511Z  INFO 21458 --- [focusboard] [           main] org.focusboard.FocusboardApplication     : Started FocusboardApplication in 5.309 seconds (process running for 5.781)
 2025-06-18T03:49:12.636Z DEBUG 21458 --- [focusboard] [           main] org.hibernate.SQL                        : select um1_0.id,um1_0.email,um1_0.otp,um1_0.otp_expiry,um1_0.password,um1_0.role,um1_0.username from user_model um1_0 where um1_0.email=?
 Hibernate: select um1_0.id,um1_0.email,um1_0.otp,um1_0.otp_expiry,um1_0.password,um1_0.role,um1_0.username from user_model um1_0 where um1_0.email=?
+2025-06-18T03:56:39.736Z  INFO 21458 --- [focusboard] [.0-12000-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-06-18T03:56:39.736Z  INFO 21458 --- [focusboard] [.0-12000-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-06-18T03:56:39.737Z  INFO 21458 --- [focusboard] [.0-12000-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+appName: focusboard
+2025-06-18T03:57:58.931Z DEBUG 21458 --- [focusboard] [.0-12000-exec-9] org.hibernate.SQL                        : select um1_0.id,um1_0.email,um1_0.otp,um1_0.otp_expiry,um1_0.password,um1_0.role,um1_0.username from user_model um1_0 where um1_0.email=?
+Hibernate: select um1_0.id,um1_0.email,um1_0.otp,um1_0.otp_expiry,um1_0.password,um1_0.role,um1_0.username from user_model um1_0 where um1_0.email=?
+2025-06-18T03:57:59.390Z DEBUG 21458 --- [focusboard] [0-12000-exec-10] org.hibernate.SQL                        : select tm1_0.id,tm1_0.created_by,tm1_0.description,tm1_0.project_id,tm1_0.status,tm1_0.title from task_model tm1_0
+Hibernate: select tm1_0.id,tm1_0.created_by,tm1_0.description,tm1_0.project_id,tm1_0.status,tm1_0.title from task_model tm1_0
+2025-06-18T03:58:44.152Z DEBUG 21458 --- [focusboard] [.0-12000-exec-3] org.hibernate.SQL                        : insert into task_model (created_by,description,project_id,status,title) values (?,?,?,?,?)
+Hibernate: insert into task_model (created_by,description,project_id,status,title) values (?,?,?,?,?)
+2025-06-18T03:58:44.470Z DEBUG 21458 --- [focusboard] [.0-12000-exec-4] org.hibernate.SQL                        : select tm1_0.id,tm1_0.created_by,tm1_0.description,tm1_0.project_id,tm1_0.status,tm1_0.title from task_model tm1_0
+Hibernate: select tm1_0.id,tm1_0.created_by,tm1_0.description,tm1_0.project_id,tm1_0.status,tm1_0.title from task_model tm1_0
+appName: focusboard
+2025-06-18T04:05:23.044Z DEBUG 21458 --- [focusboard] [.0-12000-exec-4] org.hibernate.SQL                        : select um1_0.id,um1_0.email,um1_0.otp,um1_0.otp_expiry,um1_0.password,um1_0.role,um1_0.username from user_model um1_0 where um1_0.email=?
+Hibernate: select um1_0.id,um1_0.email,um1_0.otp,um1_0.otp_expiry,um1_0.password,um1_0.role,um1_0.username from user_model um1_0 where um1_0.email=?
