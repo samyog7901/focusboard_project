@@ -1,6 +1,7 @@
 package org.focusboard.controller;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.focusboard.dto.UserDTO;
 import org.focusboard.model.UserModel;
 import org.focusboard.repository.UserRepository;
@@ -11,12 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,7 +43,17 @@ public class AuthController {
 
     // ✅ Register new user
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDTO dto) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO dto, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(
+                    result.getFieldErrors().stream()
+                            .collect(Collectors.toMap(
+                                    FieldError::getField,
+                                    FieldError::getDefaultMessage
+                            ))
+            );
+        }
+
         try {
             UserModel registeredUser = userService.registerUser(dto);
             return ResponseEntity.ok(Map.of(
@@ -49,7 +63,7 @@ public class AuthController {
                     "role", registeredUser.getRole()
             ));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

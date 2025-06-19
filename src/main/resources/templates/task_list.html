@@ -18,7 +18,6 @@
     </button>
   </div>
 
-
   <div class="bg-white shadow-md rounded-lg overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
@@ -27,6 +26,7 @@
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created By</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
       </tr>
       </thead>
@@ -35,15 +35,15 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${task.id}"></td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" th:text="${task.title}"></td>
         <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" th:text="${task.description}"></td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <span th:class="${task.status.name() == 'DONE'} ? 'bg-green-100 text-green-800' :
-                        (${task.status.name() == 'IN_PROGRESS'} ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800')"
-                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-            <span th:text="${task.status.name() == 'DONE'} ? 'Completed' : (${task.status.name() == 'IN_PROGRESS'} ? 'In Progress' : 'To Do')"></span>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <span th:with="status=${task.status}"
+                th:class="${status.getBadgeClass()}"
+                th:text="${status.getDisplayText()}"
+                class="px-2 py-1 rounded-full text-xs font-semibold">
           </span>
         </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${task.createdBy}"></td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-          <!-- ✅ Fixed: Pass actual task.id -->
           <button th:onclick="'editTask(' + ${task.id} + ')'" class="text-indigo-600 hover:text-indigo-900 mr-3">
             <i class="fas fa-edit"></i>
           </button>
@@ -51,7 +51,6 @@
             <i class="fas fa-trash-alt"></i>
           </button>
         </td>
-
       </tr>
       </tbody>
     </table>
@@ -164,7 +163,7 @@
     });
   });
 
-    document.getElementById("logOutBtn").addEventListener("click", function () {
+  document.getElementById("logOutBtn").addEventListener("click", function () {
     // Clear authentication data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -173,66 +172,61 @@
     window.location.href = "/login"; // Change this if your login page path is different
   });
 
-    // Delete Task (requires admin role)
-    function deleteTask(id) {
+  // Delete Task (requires admin role)
+  function deleteTask(id) {
     if (!confirm("Are you sure you want to delete this task?")) return;
 
     fetch(`/api/tasks/${id}`, {
-    method: 'DELETE',
-    headers: {
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
-  }
-  })
-    .then(response => {
-    if (response.ok) {
-    alert("Task deleted.");
-    location.reload(); // refresh task list
-  } else {
-    return response.text().then(text => { throw new Error(text); });
-  }
-  })
-    .catch(err => {
-    alert("Error deleting task: " + err.message);
-  });
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+            .then(response => {
+              if (response.ok) {
+                alert("Task deleted.");
+                location.reload(); // refresh task list
+              } else {
+                return response.text().then(text => { throw new Error(text); });
+              }
+            })
+            .catch(err => {
+              alert("Error deleting task: " + err.message);
+            });
   }
 
-    // Edit Task (show prompt and call PUT)
-    function editTask(id) {
+  // Edit Task (show prompt and call PUT)
+  function editTask(id) {
     const title = prompt("Enter new title:");
     const description = prompt("Enter new description:");
-    const status = prompt("Enter new status (TODO, IN_PROGRESS, DONE):");
+    const status = prompt("Enter new status (NOT_STARTED, IN_PROGRESS, DONE):");
 
     const updatedTask = {
-    title,
-    description,
-    status
-    // Add other fields like project if required
-  };
+      title,
+      description,
+      status
+    };
 
     fetch(`/api/tasks/${id}`, {
-    method: 'PUT',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
-  },
-    body: JSON.stringify(updatedTask)
-  })
-    .then(response => {
-    if (response.ok) {
-    alert("Task updated.");
-    location.reload();
-  } else {
-    return response.text().then(text => { throw new Error(text); });
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(updatedTask)
+    })
+            .then(response => {
+              if (response.ok) {
+                alert("Task updated.");
+                location.reload();
+              } else {
+                return response.text().then(text => { throw new Error(text); });
+              }
+            })
+            .catch(err => {
+              alert("Error updating task: " + err.message);
+            });
   }
-  })
-    .catch(err => {
-    alert("Error updating task: " + err.message);
-  });
-  }
-
-
-
-
 </script>
 </body>
 </html>
