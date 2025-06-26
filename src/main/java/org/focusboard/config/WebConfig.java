@@ -15,9 +15,7 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "http://localhost:5173",
-                            "https://work-1-pisjratpnsdrnsvp.prod-runtime.all-hands.dev",
-                            "https://work-2-pisjratpnsdrnsvp.prod-runtime.all-hands.dev"
+                            "http://192.168.73:12000"
                         )
                         .allowedMethods("*")
                         .allowedHeaders("*")

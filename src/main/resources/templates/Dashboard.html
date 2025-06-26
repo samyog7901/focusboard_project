@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #sidebar {
+            transition: all 0.3s ease;
+        }
+        .collapsed {
+            width: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+    </style>
+</head>
+<body class="flex bg-gray-100 h-screen">
+
+<!-- Sidebar -->
+<div id="sidebar" class="bg-blue-900 text-white w-64 transition-all duration-300 flex flex-col">
+    <div class="p-4 font-bold text-xl border-b border-white">FocusBoard</div>
+    <nav class="flex flex-col mt-6 space-y-2 px-4 text-white">
+        <a href="/dashboard" class="hover:bg-blue-700 p-2 rounded">🏠 Dashboard</a>
+        <a href="/api/projects" class="hover:bg-blue-700 p-2 rounded">📁 Projects</a>
+        <a href="/dashboard/api/tasks" class="hover:bg-blue-700 p-2 rounded">📝 Tasks</a>
+        <a href="/profile" class="hover:bg-blue-700 p-2 rounded">🙍‍♂️ Profile</a>
+        <a href="/settings" class="hover:bg-blue-700 p-2 rounded">⚙️ Settings</a>
+
+        <!-- Show for admin only -->
+        <div id="adminSection" class="border-t border-blue-700 pt-4 mt-4 hidden">
+            <span class="uppercase text-xs text-blue-200">Admin</span>
+            <a href="/admin/users" class="hover:bg-blue-700 p-2 rounded">👥 Manage Users</a>
+            <a href="/admin/reports" class="hover:bg-blue-700 p-2 rounded">📊 Reports</a>
+        </div>
+
+        <button onclick="logout()" class="mt-auto bg-red-600 hover:bg-red-700 text-white p-2 rounded">🚪 Logout</button>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="flex-1 flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between p-4 bg-white shadow-md">
+        <button id="toggleBtn" class="text-2xl">&#9776;</button>
+        <h2 class="text-xl font-semibold">Welcome, <span id="userRole">User</span></h2>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-1 overflow-y-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold text-lg mb-2">Total Projects</h3>
+                <p class="text-2xl font-bold text-blue-700">5</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold text-lg mb-2">Tasks In Progress</h3>
+                <p class="text-2xl font-bold text-orange-500">12</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold text-lg mb-2">Completed Tasks</h3>
+                <p class="text-2xl font-bold text-green-600">18</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-xl font-semibold mb-4">Recent Tasks</h3>
+            <ul class="space-y-2">
+                <li class="flex justify-between border-b pb-2">
+                    <span>Design login page</span>
+                    <span class="text-sm bg-yellow-100 text-yellow-800 px-2 rounded">To Do</span>
+                </li>
+                <li class="flex justify-between border-b pb-2">
+                    <span>API integration</span>
+                    <span class="text-sm bg-blue-100 text-blue-800 px-2 rounded">In Progress</span>
+                </li>
+                <li class="flex justify-between">
+                    <span>Database backup</span>
+                    <span class="text-sm bg-green-100 text-green-800 px-2 rounded">Completed</span>
+                </li>
+            </ul>
+        </div>
+    </main>
+</div>
+
+<script>
+    document.getElementById('toggleBtn').addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+    });
+
+    // Role detection for admin panel visibility
+    const userRole = localStorage.getItem("role") || "USER";
+    document.getElementById("userRole").innerText = userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase();
+    if (userRole === "ADMIN") {
+        document.getElementById("adminSection").classList.remove("hidden");
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        window.location.href = "/login";
+    }
+</script>
+</body>
+</html>

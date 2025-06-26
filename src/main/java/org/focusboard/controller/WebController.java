@@ -45,6 +45,6 @@ public class WebController {
         // For now, get all tasks. In a real app, you'd filter by user
         List<TaskModel> tasks = taskRepository.findAll();
         model.addAttribute("tasks", tasks);
-        return "task_list";
+        return "Dashboard";
     }
 }

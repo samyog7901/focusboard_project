@@ -17,11 +17,14 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+
+@CrossOrigin(origins = "http://192.168.194.203:5173")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -54,6 +57,11 @@ public class AuthController {
             );
         }
 
+        // ✅ Manual backend validation
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Passwords do not match"));
+        }
+
         try {
             UserModel registeredUser = userService.registerUser(dto);
             return ResponseEntity.ok(Map.of(
@@ -79,17 +87,20 @@ public class AuthController {
             // Generate JWT token
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Login successful",
-                    "username", user.getUsername(),
-                    "email", user.getEmail(),
-                    "role", user.getRole(),
-                    "token", token
-            ));
+            // Use HashMap instead of Map.of to allow nulls
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login successful");
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
+            response.put("role", user.getRole());
+            response.put("token", token);
+
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
+
 
     // ✅ Forgot password: generate OTP and email
     @PostMapping("/forgot-password")
@@ -115,18 +126,24 @@ public class AuthController {
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
         String email = body.get("email");
-        String otp = body.get("otp");
+        String otp = String.valueOf(body.get("otp"));
 
         Optional<UserModel> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error", "Invalid user"));
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid user"));
+        }
 
         UserModel user = userOpt.get();
 
-        if (user.getOtp() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+        System.out.println(">> OTP in DB: " + user.getOtp());
+        System.out.println(">> OTP Expiry: " + user.getOtpExpiry());
+        System.out.println(">> Is Expired: " + (user.getOtpExpiry() != null && user.getOtpExpiry().isBefore(LocalDateTime.now())));
+
+        if (user.getOtp() == null || user.getOtpExpiry() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
             return ResponseEntity.badRequest().body(Map.of("error", "OTP expired"));
         }
 
-        if (!otp.equals(user.getOtp())) {
+        if (otp == null || !otp.equals(user.getOtp())) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid OTP"));
         }
 
@@ -141,15 +158,26 @@ public class AuthController {
         String newPassword = body.get("newPassword");
 
         Optional<UserModel> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error", "Invalid user"));
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid user"));
+        }
 
         UserModel user = userOpt.get();
 
-        if (!otp.equals(user.getOtp()) || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+        System.out.println(">> Email: " + email);
+        System.out.println(">> OTP from user: " + otp);
+        System.out.println(">> OTP in DB: " + user.getOtp());
+        System.out.println(">> OTP Expiry: " + user.getOtpExpiry());
+        System.out.println(">> Is Expired: " + (user.getOtpExpiry() != null && user.getOtpExpiry().isBefore(LocalDateTime.now())));
+
+        if (otp == null || user.getOtp() == null || user.getOtpExpiry() == null || user.getOtpExpiry().isBefore(LocalDateTime.now())) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired OTP"));
         }
 
-        // Encode and save new password
+        if (!otp.equals(user.getOtp())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid OTP"));
+        }
+
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setOtp(null);
         user.setOtpExpiry(null);
