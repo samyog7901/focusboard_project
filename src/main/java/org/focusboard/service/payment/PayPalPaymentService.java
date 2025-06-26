@@ -1,4 +1,4 @@
-package org.focusboard;
+package org.focusboard.service.payment;
 
 public class PayPalPaymentService implements PaymentService {
     @Override

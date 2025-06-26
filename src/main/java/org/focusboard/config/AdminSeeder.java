@@ -17,13 +17,14 @@ public class AdminSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(userRepository.findByEmail("admin").isEmpty()){
+        if(userRepository.findByEmail("admin@example.com").isEmpty()){
             UserModel admin = new UserModel();
             admin.setUsername("admin");
+            admin.setEmail("admin@example.com");
             admin.setPassword(new BCryptPasswordEncoder().encode("admin123"));
             admin.setRole("ADMIN");
             userRepository.save(admin);
-            System.out.println("Admin user created: username=admin, password=admin123");
+            System.out.println("Admin user created: username=admin, email=admin@example.com, password=admin123");
         }
     }
 }

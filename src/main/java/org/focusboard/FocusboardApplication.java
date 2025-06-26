@@ -10,13 +10,11 @@ public class FocusboardApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FocusboardApplication.class, args);
-//		var orderService = new OrderService(new PayPalPaymentService());
-//		orderService.placeOrder();
 	}
-//
-//	@Bean
-//	public BCryptPasswordEncoder passwordEncoder() {
-//		return new BCryptPasswordEncoder();
-//	}
+
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
 }

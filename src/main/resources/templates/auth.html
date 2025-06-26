@@ -10,8 +10,9 @@
         function toggleMode(login) {
             isLoginMode = login;
             document.getElementById('heading').innerText = isLoginMode ? 'Login' : 'Sign Up';
-            document.getElementById('nameField').style.display = isLoginMode ? 'none' : 'block';
-            document.getElementById('confirmPassword').style.display = isLoginMode ? 'none' : 'block';
+            document.getElementById('confirmPassword').classList.toggle('hidden', isLoginMode);
+            document.getElementById('nameField').classList.toggle('hidden', isLoginMode);
+
             document.getElementById('forgotPassword').style.display = isLoginMode ? 'block' : 'none';
             document.getElementById('submitBtn').innerText = isLoginMode ? 'Login' : 'Signup';
             document.getElementById('toggleText').innerHTML = isLoginMode
@@ -21,9 +22,73 @@
             document.getElementById('indicator').classList.toggle('left-0', isLoginMode);
             document.getElementById('indicator').classList.toggle('left-1/2', !isLoginMode);
         }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const payload = {
+                username: form.name?.value.trim(),
+                email: form.email.value.trim(),
+                password: form.password.value,
+                confirmPassword: form.confirmPassword?.value
+            };
+
+            console.log('Submitting:', payload);
+
+            if (!isLoginMode) {
+                // Client-side validation
+                if (payload.password !== payload.confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                if (payload.password.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    return;
+                }
+            }
+
+            try {
+                const endpoint = isLoginMode
+                    ? '/api/auth/login'
+                    : '/api/auth/register';
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(isLoginMode ? {
+                        email: payload.email,
+                        password: payload.password
+                    } : payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error || 'Authentication failed');
+
+                if (isLoginMode) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Registration successful! Please login.');
+                    toggleMode(true);
+                    form.reset();
+                }
+            } catch (error) {
+                console.error('Auth Error:', error);
+                alert(error.message);
+            }
+        }
+
     </script>
 </head>
 <body class="bg-[#498bf5] min-h-screen flex items-center justify-center px-4">
+<div class="absolute top-4 left-4 bg-gradient-to-r from-blue-700 via-cyan-600 to-cyan-200 rounded-full transition-all left-0">
+    <a href="/" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white rounded-full transition-all left-0">
+        ← Back to Intro Page
+    </a>
+</div>
 
 <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
     <!-- Heading -->
@@ -31,13 +96,13 @@
 
     <!-- Tabs -->
     <div class="relative flex h-12 mb-6 border border-gray-300 rounded-full overflow-hidden">
-        <button onclick="toggleMode(true)" class="w-1/2 text-lg font-medium z-10 text-white">Login</button>
-        <button onclick="toggleMode(false)" class="w-1/2 text-lg font-medium z-10 text-black">Signup</button>
+        <button type="button" onclick="toggleMode(true)" class="w-1/2 text-lg font-medium z-10 text-white">Login</button>
+        <button type="button" onclick="toggleMode(false)" class="w-1/2 text-lg font-medium z-10 text-black">Signup</button>
         <div id="indicator" class="absolute top-0 h-full w-1/2 rounded-full bg-gradient-to-r from-blue-700 via-cyan-600 to-cyan-200 transition-all left-0"></div>
     </div>
 
-    <!-- Form -->
-    <form class="space-y-4" method="POST" action="/auth">
+    <!-- ✅ Fixed: Correct event parameter -->
+    <form class="space-y-4" onsubmit="handleSubmit(event)">
         <!-- Signup-only field -->
         <input id="nameField" name="name" type="text" placeholder="Name" class="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-cyan-500 placeholder-gray-400 hidden" />
 
@@ -50,7 +115,7 @@
 
         <!-- Forgot Password -->
         <div id="forgotPassword" class="text-right">
-            <a href="#" class="text-cyan-600 hover:underline text-sm">Forgot password?</a>
+            <a href="/forgot-password" class="text-cyan-600 hover:underline text-sm">Forgot password?</a>
         </div>
 
         <!-- Submit Button -->

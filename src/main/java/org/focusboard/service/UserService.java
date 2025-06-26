@@ -55,7 +55,7 @@ public class UserService {
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new RuntimeException("Passwords do not match");
         }
-        
+
 
         UserModel user = new UserModel();
         user.setUsername(dto.getUsername());

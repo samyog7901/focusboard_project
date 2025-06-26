@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Verify OTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Load email from localStorage
+        window.onload = function() {
+            const email = localStorage.getItem('resetEmail');
+            if (!email) {
+                alert('No email found. Please start from forgot password.');
+                window.location.href = '/forgot-password';
+                return;
+            }
+            document.getElementById('emailDisplay').textContent = email;
+        }
+
+        async function handleVerifyOTP(event) {
+            event.preventDefault();
+            const email = localStorage.getItem('resetEmail');
+            const otp = document.getElementById('otp').value;
+
+            try {
+                // ✅ Updated to port 12000
+                const res = await fetch('http://localhost:12000/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(data.message);
+                    // Store OTP for password reset
+                    localStorage.setItem('verifiedOTP', otp);
+                    window.location.href = "/reset-password";
+                } else {
+                    alert(data.error || 'Error occurred');
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        function resendOTP() {
+            const email = localStorage.getItem('resetEmail');
+            if (!email) return;
+
+            // ✅ Updated to port 12000
+            fetch('http://localhost:12000/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.message) {
+                        alert('OTP resent successfully!');
+                    } else {
+                        alert(data.error || 'Error resending OTP');
+                    }
+                })
+                .catch(error => alert("Error: " + error.message));
+        }
+    </script>
+</head>
+<body class="bg-[#498bf5] flex justify-center items-center min-h-screen px-4">
+<div class="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full">
+    <h1 class="text-3xl font-bold mb-6 text-center text-[#002266]">Verify OTP</h1>
+    <p class="text-center text-gray-600 mb-4">
+        Enter the 6-digit code sent to<br>
+        <strong id="emailDisplay"></strong>
+    </p>
+    <form onsubmit="handleVerifyOTP(event)" class="space-y-4">
+        <input type="text" id="otp" placeholder="Enter 6-digit OTP" maxlength="6" required
+               class="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-cyan-500 text-center text-2xl tracking-widest" />
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-blue-700 via-cyan-600 to-cyan-200 text-white rounded-full p-3 font-medium hover:opacity-90">
+            Verify OTP
+        </button>
+    </form>
+    <div class="text-center mt-4 space-y-2">
+        <button onclick="resendOTP()" class="text-blue-600 hover:underline">Resend OTP</button>
+        <br>
+        <a href="/forgot-password" class="text-gray-600 hover:underline">Back to Email</a>
+    </div>
+</div>
+</body>
+</html>
